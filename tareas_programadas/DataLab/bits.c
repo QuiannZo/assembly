@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * <Quiann Zolfaghari C18723>
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -169,6 +169,9 @@ NOTES:
    - 56 emoji characters
    - 285 hentaigana
    - 3 additional Zanabazar Square characters */
+
+#include <limits.h>
+
 //1
 /* 
  * bitAnd - x&y using only ~ and | 
@@ -178,7 +181,8 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+   int result = ~(~x | ~y); // Law of morgan.
+  return result;
 }
 /*
  * isZero - returns 1 if x == 0, and 0 otherwise 
@@ -188,7 +192,9 @@ int bitAnd(int x, int y) {
  *   Rating: 1
  */
 int isZero(int x) {
-  return 2;
+   // negation of 0(false) is 1(true).
+   int result = !x;
+  return result;
 }
 //2
 /* 
@@ -201,7 +207,22 @@ int isZero(int x) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+    // Calculate the byte positions to swap.
+    n = n << 3; // mul by 8.
+    m = m << 3;
+    
+    // Extract and clear bytes.
+    int ex_n = (x >> n) & 0xFF;
+    int ex_m = (x >> m) & 0xFF;
+    x = x & ~(0xFF << n);
+    x = x & ~(0xFF << m);
+    
+    // Place the swapped bytes in their new pos(shift).
+    ex_n = ex_n << m;
+    ex_m = ex_m << n;
+    x = x | ex_n; // Place byte n in the position of byte m
+    x = x | ex_m; // Place byte m in the position of byte n
+   return x;
 }
 /* 
  * implication - return x -> y in propositional logic - 0 for false, 1
@@ -213,7 +234,7 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 2
  */
 int implication(int x, int y) {
-    return 2;
+    return ((!x) | y); // Returns 1 if equal, or 0 for false.
 }
 //3
 /* 
@@ -224,8 +245,16 @@ int implication(int x, int y) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  return 2;
+   // get the signs.
+    int sign_x = (x >> 31) & 1;
+    int sign_y = (y >> 31) & 1;
+    // check difference.
+    int sign_diff = sign_x ^ sign_y;
+    // Calculate the possitive differenc between x and y.
+    int pos_diff = ~(sign_diff | (y + ~x) >> 31);
+    return (sign_diff & sign_x) | (!sign_diff & pos_diff);
 }
+
 /* 
  * conditional - same as x ? y : z 
  *   Example: conditional(2,4,5) = 4
@@ -234,7 +263,9 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+    x = (!x + ~0x0); // The ! to transform x into 1 or 0.
+    // select y if x is 1, or z if x is 0. (Simulating the ternary op).
+    return (y & x) | (z & ~x);
 }
 /*
  * sum3 - x+y+z using only a single '+'
@@ -248,16 +279,9 @@ static int sum(int x, int y) {
   return x+y;
 }
 int sum3(int x, int y, int z) {
-   int word1 = 0;
-   int word2 = 0;
-   /**************************************************************
-      Fill in code below that computes values for word1 and word2
-      without using any '+' operations
-   ***************************************************************/
-   /**************************************************************
-      Don't change anything below here
-   ***************************************************************/
-   return sum(word1,word2);
+    int word1 = sum(x, y); // call sum.
+    int word2 = z;
+    return sum(word1, word2);
 }
 //4
 /* 
@@ -269,7 +293,10 @@ int sum3(int x, int y, int z) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  int sign = x >> 31; // Extract sign bit (1 for negative, 0 for non-negative).
+  int flip = x ^ sign; // Flip all bits if x is negative.
+  int result = flip + (1 + ~sign); // Add 1 if x is negative.
+  return result;
 }
 /*
  * trueFiveEighths - multiplies by 5/8 rounding toward 0,
@@ -281,9 +308,15 @@ int absVal(int x) {
  *  Max ops: 25
  *  Rating: 4
  */
-int trueFiveEighths(int x)
-{
-    return 2;
+int trueFiveEighths(int x) {
+    // Get the sign of x and abs value.
+    long sign = x >> 31; 
+    long abs_x = (x ^ sign) + (~sign + 1);
+    long multiply_by_5 = (abs_x << 2) + abs_x;  // Multiply by 5: (4 * abs_x) + abs_x
+    long divide_by_8 = multiply_by_5 >> 3;  // Divide by 8: (4 * abs_x) / 8 = abs_x / 2
+
+    // Restore the sign of the result. (If negative add the '-').
+    return (divide_by_8 ^ sign) + (sign & 1);
 }
 /*
  * isPower2 - returns 1 if x is a power of 2, and 0 otherwise
@@ -294,5 +327,9 @@ int trueFiveEighths(int x)
  *   Rating: 4
  */
 int isPower2(int x) {
-  return 2;
+  int nonNegative = !(x >> 31); // Check if x is positive or zero.
+  int notZero = !!x; // Check if x is not zero.
+  int powerOf2 = !(x & (x + ~0)); // Check if x is a power of 2.
+  
+  return nonNegative & notZero & powerOf2;
 }
