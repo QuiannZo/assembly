@@ -1,29 +1,20 @@
-#  C++ interface with assembly
+#Pass the year x and verify the conditions to return 0 or 1.
 #
-#  First parameter  -> DI
-#  Second parameter -> SI
-#  Third parameter  -> DX
-#  Fourth parameter -> CX
-#  Fifth parameter  -> r8
-#  Sixth parameter  -> r9
-#  Next parameters on stack
-#
-#  Return value in AX
+#The return value is in %rax. x in rdi.
 
 .text
-.global strLen
+.global f
 
-strLen:
-    xor %rax, %rax         # Initialize rax.
-    mov %rdi, %rcx         # Copy the address of the input string in %rcx.
+f:
+    mov $0, %rax         # Initialize rax.
 
 loop:
-    movb (%rcx), %al       # Load the next char to %al.
-    test %al, %al          # Check if current is the null terminator.
+    movb (%rdi), %al
+    test %al, %al
     jz done
-    inc %rcx               # Move to the next char.
-    inc %rax               # Increment length.
-    jmp loop               # Cycle.
+    inc %rdi
+    inc %rax
+    jmp loop
 
 done:
-    ret                    # Return the length in %rax
+    ret
